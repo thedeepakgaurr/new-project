@@ -1,7 +1,170 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/bricolage-grotesque';
 
-body {
-  @apply bg-gray-50 text-gray-900;
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic design tokens. Components only use these, so dark mode is just a
+   second set of values rather than dark: variants sprinkled everywhere. */
+:root {
+  --bg: #f8f8fa;
+  --surface: #ffffff;
+  --surface-2: #f3f3f6;
+  --surface-3: #e9e9ee;
+  --fg: #0c0c10;
+  --fg-2: #3a3a42;
+  --muted: #6b6b76;
+  --subtle: #a0a0ab;
+  --line: #e6e6ec;
+  --line-strong: #d3d3db;
+  --brand: #6448ff;
+  --brand-fg: #ffffff;
+  --brand-soft: #efecff;
+  --brand-ink: #4a30d9;
+  --success: #15803d;
+  --success-soft: #e8f7ee;
+  --warning: #b45309;
+  --warning-soft: #fdf3e2;
+  --danger: #dc2626;
+  --danger-soft: #fdecec;
+  --info: #1d6fd8;
+  --info-soft: #e8f1fd;
+  --shadow-color: 240 10% 20%;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #08080b;
+  --surface: #111115;
+  --surface-2: #17171c;
+  --surface-3: #212128;
+  --fg: #f4f4f6;
+  --fg-2: #d2d2d9;
+  --muted: #9d9daa;
+  --subtle: #6c6c78;
+  --line: #24242b;
+  --line-strong: #32323b;
+  --brand: #8b74ff;
+  --brand-fg: #ffffff;
+  --brand-soft: #1d1840;
+  --brand-ink: #bcaeff;
+  --success: #4ade80;
+  --success-soft: #0f2a1a;
+  --warning: #fbbf24;
+  --warning-soft: #2b2110;
+  --danger: #f87171;
+  --danger-soft: #2e1212;
+  --info: #60a5fa;
+  --info-soft: #0f1e33;
+  --shadow-color: 0 0% 0%;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', ui-sans-serif, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.05), 0 2px 6px -1px hsl(var(--shadow-color) / 0.06);
+  --shadow-md: 0 2px 4px -1px hsl(var(--shadow-color) / 0.06), 0 8px 24px -6px hsl(var(--shadow-color) / 0.12);
+  --shadow-lg: 0 4px 8px -2px hsl(var(--shadow-color) / 0.06), 0 24px 48px -12px hsl(var(--shadow-color) / 0.22);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-gradient: gradient-pan 8s ease infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes gradient-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 25%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--subtle);
+  }
+}
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(110deg, #7b5cff 0%, #d946a8 45%, #ff7a3d 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-brand-gradient {
+    background: linear-gradient(120deg, #7b5cff 0%, #d946a8 50%, #ff7a3d 100%);
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

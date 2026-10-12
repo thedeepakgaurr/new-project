@@ -2,10 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SocialBoost AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>SocialBoost AI — Platform-ready social content from any photo or video</title>
+    <meta
+      name="description"
+      content="Upload an image or video and get platform-ready captions, titles, hashtags, hooks and CTAs for Instagram, YouTube and Facebook in seconds."
+    />
+    <meta name="theme-color" content="#f8f8fa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#08080b" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SocialBoost AI" />
+    <meta
+      property="og:description"
+      content="Platform-ready captions, titles, hashtags, hooks and CTAs from any photo or video."
+    />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Apply the saved theme before first paint to avoid a light/dark flash -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('sb-theme') || 'system';
+          var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
+    <noscript>SocialBoost AI needs JavaScript enabled to run.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

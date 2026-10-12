@@ -1,77 +1,126 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getErrorMessage } from '../api/axios.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import Button from '../components/ui/Button.jsx';
+import { TextField } from '../components/ui/Field.jsx';
+import { FormError } from './Login.jsx';
+import { cn } from '../lib/format.js';
+
+// Mirrors the server-side password policy in backend/routes/auth.js
+export const PASSWORD_RULES = [
+  { label: '8+ characters', test: (p) => p.length >= 8 },
+  { label: 'A letter', test: (p) => /[A-Za-z]/.test(p) },
+  { label: 'A number', test: (p) => /\d/.test(p) }
+];
+
+export function PasswordChecklist({ password }) {
+  return (
+    <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1" aria-label="Password requirements">
+      {PASSWORD_RULES.map(({ label, test }) => {
+        const ok = test(password);
+        return (
+          <li key={label} className={cn('flex items-center gap-1.5 text-xs transition-colors', ok ? 'text-success' : 'text-subtle')}>
+            <span
+              className={cn(
+                'flex size-3.5 items-center justify-center rounded-full transition-colors',
+                ok ? 'bg-success text-white' : 'border border-line-strong'
+              )}
+            >
+              {ok && <Check className="size-2.5" strokeWidth={3.5} />}
+            </span>
+            {label}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function Register() {
+  useDocumentTitle('Create account');
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const passwordOk = PASSWORD_RULES.every((r) => r.test(form.password));
+
   const submit = async (e) => {
     e.preventDefault();
+    if (!passwordOk) {
+      setError('Please choose a password that meets all the requirements.');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password);
-      navigate('/dashboard');
+      await register(form.name.trim(), form.email.trim(), form.password);
+      navigate('/generate', { replace: true, state: { welcome: true } });
     } catch (err) {
-  const message = err?.response?.data?.message;
-
-  if (message?.includes('buffering timed out') ||
-      message?.includes('users.findOne()')) {
-    setError('Something went wrong. Please try again.');
-  } else {
-    setError(message || 'Something went wrong. Please try again.');
-  }
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white border rounded-lg p-6 mt-8">
-      <h1 className="text-xl font-bold mb-4">Register</h1>
-      {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-3">{error}</p>}
-      <form onSubmit={submit} className="space-y-3">
+    <>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Create your account</h1>
+      <p className="mt-2 text-sm text-muted">Start turning your media into ready-to-post content.</p>
+
+      <form onSubmit={submit} className="mt-8 space-y-4">
+        <FormError message={error} />
+        <TextField
+          label="Name"
+          autoComplete="name"
+          required
+          maxLength={80}
+          autoFocus
+          value={form.name}
+          onChange={update('name')}
+          placeholder="Your name"
+        />
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          required
+          value={form.email}
+          onChange={update('email')}
+          placeholder="you@example.com"
+        />
         <div>
-          <label className="text-sm font-medium">Name</label>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="mt-1 w-full border rounded p-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <input
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="mt-1 w-full border rounded p-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Password</label>
-          <input
+          <TextField
+            label="Password"
             type="password"
+            autoComplete="new-password"
             required
-            minLength={6}
+            minLength={8}
+            maxLength={128}
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="mt-1 w-full border rounded p-2 text-sm"
+            onChange={update('password')}
+            placeholder="Create a password"
           />
+          <PasswordChecklist password={form.password} />
         </div>
-        <button disabled={loading} className="w-full bg-indigo-600 text-white rounded py-2 text-sm hover:bg-indigo-500 disabled:opacity-60">
-          {loading ? 'Creating account...' : 'Register'}
-        </button>
+        <Button type="submit" size="lg" loading={loading} className="mt-2 w-full">
+          {loading ? 'Creating account…' : 'Create account'}
+          {!loading && <ArrowRight className="size-4" />}
+        </Button>
       </form>
-      <p className="text-sm mt-3">
-        Have an account? <Link to="/login" className="text-indigo-600">Login</Link>
+
+      <p className="mt-8 text-center text-sm text-muted">
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium text-fg underline-offset-4 hover:underline">
+          Sign in
+        </Link>
       </p>
-    </div>
+    </>
   );
 }

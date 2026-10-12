@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
+const config = require('./env');
 
-// Connect to MongoDB via MONGO_URI
-async function connectDB() {
-  const uri = process.env.MONGO_URI;
-  if (!uri) throw new Error('MONGO_URI is not defined in environment');
+// Connect to MongoDB; rejects if the cluster can't be reached within the timeout
+async function connectDB(uri = config.mongoUri) {
   mongoose.set('strictQuery', true);
-  await mongoose.connect(uri);
-  console.log('MongoDB connected');
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 10_000 });
+  if (!config.isTest) console.log('MongoDB connected');
 }
 
 module.exports = connectDB;

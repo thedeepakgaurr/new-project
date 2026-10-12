@@ -1,67 +1,58 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
+import { lazy, Suspense } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import ProtectedRoute, { FullPageLoader, GuestRoute } from './components/ProtectedRoute.jsx';
+import PublicLayout from './components/layout/PublicLayout.jsx';
 import Home from './pages/Home.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Generate from './pages/Generate.jsx';
-import Result from './pages/Result.jsx';
-import Saved from './pages/Saved.jsx';
-import History from './pages/History.jsx';
+
+// Route-level code splitting: the landing page doesn't download the app
+const AuthLayout = lazy(() => import('./components/layout/AuthLayout.jsx'));
+const AppLayout = lazy(() => import('./components/layout/AppLayout.jsx'));
+const Login = lazy(() => import('./pages/Login.jsx'));
+const Register = lazy(() => import('./pages/Register.jsx'));
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const Generate = lazy(() => import('./pages/Generate.jsx'));
+const Result = lazy(() => import('./pages/Result.jsx'));
+const Saved = lazy(() => import('./pages/Saved.jsx'));
+const History = lazy(() => import('./pages/History.jsx'));
+const Settings = lazy(() => import('./pages/Settings.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 export default function App() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        <Routes>
+    <Suspense fallback={<FullPageLoader />}>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route index element={<Home />} />
+        </Route>
+
+        <Route
+          element={
+            <GuestRoute>
+              <AuthLayout />
+            </GuestRoute>
+          }
+        >
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/generate"
-            element={
-              <ProtectedRoute>
-                <Generate />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/result/:id"
-            element={
-              <ProtectedRoute>
-                <Result />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/saved"
-            element={
-              <ProtectedRoute>
-                <Saved />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <History />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/generate" element={<Generate />} />
+          <Route path="/result/:id" element={<Result />} />
+          <Route path="/saved" element={<Saved />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }

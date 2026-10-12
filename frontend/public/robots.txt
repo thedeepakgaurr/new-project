@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /generate
+Disallow: /result/
+Disallow: /saved
+Disallow: /history
+Disallow: /settings

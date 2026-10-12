@@ -1,18 +1,23 @@
 {
-  "name": "new-project",
+  "name": "socialboost-ai",
   "version": "1.0.0",
-  "description": "MERN + Gemini + Cloudinary. Per SRS: upload image/video → select platform (Instagram/YouTube/Facebook) → content type → AI analysis + platform-specific captions, titles, descriptions, hashtags, keywords, hooks, CTAs → edit/regenerate/save/copy → history.",
-  "main": "index.js",
+  "private": true,
+  "description": "AI-powered social media content optimization — MERN + Gemini + Cloudinary.",
   "scripts": {
-   "frontend": "npm run dev --prefix frontend",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run backend\" \"npm run frontend\"",
     "backend": "npm run dev --prefix backend",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm start --prefix backend",
+    "test": "npm test --prefix backend",
+    "lint": "npm run lint --prefix frontend",
+    "check": "npm run lint && npm test && npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "concurrently": "^10.0.6"
   }

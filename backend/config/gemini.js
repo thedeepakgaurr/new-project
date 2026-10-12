@@ -1,14 +1,17 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
+const config = require('./env');
+const HttpError = require('../utils/httpError');
 
-let genAI = null;
+let client = null;
 
-// Lazily create the client so missing keys fail only when AI is called
+// Lazily create the client so a missing key fails only when AI is called
 function getGenAI() {
-  if (genAI) return genAI;
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error('GEMINI_API_KEY is not defined in environment');
-  genAI = new GoogleGenerativeAI(key);
-  return genAI;
+  if (client) return client;
+  if (!config.gemini.apiKey) {
+    throw new HttpError(503, 'AI generation is not configured on the server.');
+  }
+  client = new GoogleGenAI({ apiKey: config.gemini.apiKey });
+  return client;
 }
 
 module.exports = { getGenAI };

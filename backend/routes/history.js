@@ -1,17 +1,35 @@
 const express = require('express');
 const auth = require('../middleware/auth');
+const validate = require('../middleware/validate');
 const ContentHistory = require('../models/ContentHistory');
+const { paginationRules, readPagination } = require('../utils/pagination');
 
 const router = express.Router();
 router.use(auth);
 
-// GET /api/history — all history for the current user
-router.get('/', async (req, res, next) => {
+// GET /api/history?page&limit — newest first
+router.get('/', paginationRules, validate, async (req, res, next) => {
   try {
-    const history = await ContentHistory.find({ userId: req.userId })
-      .populate('contentId')
-      .sort({ createdAt: -1 });
-    res.json({ history });
+    const { page, limit, skip } = readPagination(req, 30);
+    const [rows, total] = await Promise.all([
+      ContentHistory.find({ userId: req.userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'contentId',
+          select: 'platform contentType title caption hook createdAt mediaId',
+          populate: { path: 'mediaId', select: 'fileUrl mediaType' },
+        }),
+      ContentHistory.countDocuments({ userId: req.userId }),
+    ]);
+    res.json({
+      history: rows.filter((h) => h.contentId),
+      page,
+      limit,
+      total,
+      hasMore: skip + rows.length < total,
+    });
   } catch (err) {
     next(err);
   }

@@ -9,4 +9,6 @@ const contentHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+contentHistorySchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('ContentHistory', contentHistorySchema);
